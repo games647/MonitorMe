@@ -64,8 +64,8 @@ func worker() {
 	graphs[2] = loadGraph
 
 	ticker := time.NewTicker(time.Second)
-	for t := range ticker.C {
-		log.Println(t)
+	for {
+		<-ticker.C
 
 		scrollForward()
 		for _, graph := range graphs {
