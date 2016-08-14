@@ -8,15 +8,15 @@ import (
 	"log"
 	"github.com/getlantern/systray"
 	"time"
-	"github.com/cloudfoundry/gosigar"
+	"github.com/scalingdata/gosigar"
 )
 
-var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * 4, GRAPH_SIZE))
+var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * 6, GRAPH_SIZE))
 var iconData []byte
 
 func main() {
 	//initial paint the complete background
-	for posX := 0; posX <= GRAPH_SIZE * 4; posX++ {
+	for posX := 0; posX <= GRAPH_SIZE * 6; posX++ {
 		vLine(icon, posX, 0, GRAPH_SIZE, background)
 	}
 
@@ -53,7 +53,7 @@ func vLine(icon *image.RGBA, posX int, topY int, bottomY int, col color.RGBA) {
 }
 
 func worker() {
-	graphs := [4]MonitorData{}
+	graphs := [6]MonitorData{}
 
 	cpu := sigar.Cpu{}
 	cpu.Get()
@@ -63,10 +63,14 @@ func worker() {
 	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1}, swap: sigar.Swap{}}
 	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1}, load: sigar.LoadAverage{}}
 	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1}, cpu: cpu}
+	diskGraph := &DiskGraph{graph: Graph{GRAPH_SIZE * 4, GRAPH_SIZE * 5 - 1}, disk: sigar.DiskIo{}}
+	netGraph := &NetworkGraph{graph: Graph{GRAPH_SIZE * 5, GRAPH_SIZE * 6 - 1}, netIFace: sigar.NetIface{}}
 	graphs[0] = memGraph
 	graphs[1] = swapGraph
 	graphs[2] = loadGraph
 	graphs[3] = cpuGraph
+	graphs[4] = diskGraph
+	graphs[5] = netGraph
 
 	ticker := time.NewTicker(time.Second)
 	for {
@@ -85,7 +89,7 @@ func worker() {
 //move the old data one row back
 func scrollForward() {
 	//start with the second row and just override the first row
-	for posX := 1; posX < GRAPH_SIZE * 4; posX++ {
+	for posX := 1; posX < GRAPH_SIZE * 6; posX++ {
 		for posY := 0; posY <= GRAPH_SIZE; posY++ {
 			col := icon.At(posX, posY)
 			icon.Set(posX - 1, posY, col)
@@ -93,7 +97,7 @@ func scrollForward() {
 	}
 
 	//set the background of the new created row at the end
-	vLine(icon, GRAPH_SIZE * 3, 0, GRAPH_SIZE, background)
+	vLine(icon, GRAPH_SIZE * 6, 0, GRAPH_SIZE, background)
 }
 
 func flushDataToIcon() {

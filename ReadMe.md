@@ -10,11 +10,12 @@ Cross-platform application to display performance charts in the taskbar as a tra
 * Swap
 * Load average (*nix only)
 * CPU usage (system and user)
+* Network usage (only available in cloudfoundry/gosigar)
+* Disk usage (only available in cloudfoundry/gosigar)
 
 ### Planned 
 
-* Network usage (only available in cloudfoundry/gosigar)
-* Disk usage (only available in cloudfoundry/gosigar)
+* Menu items about more detailed data
 
 ## Downloads
 

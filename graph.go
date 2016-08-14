@@ -2,9 +2,8 @@ package main
 
 import (
 	"image/color"
-	"github.com/cloudfoundry/gosigar"
+	"github.com/scalingdata/gosigar"
 	"image"
-	"log"
 )
 
 const GRAPH_SIZE = 100
@@ -104,9 +103,76 @@ func (cpuGraph *CpuGraph) collectData() {
 
 func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
 	systemPct := cpuGraph.diffSystem
-	log.Println(cpuGraph.graph.endX)
 	vLine(icon, cpuGraph.graph.endX, 100 - systemPct, GRAPH_SIZE, systemCpuCol)
 
 	userPct := cpuGraph.diffUser
 	vLine(icon, cpuGraph.graph.endX, 100 - userPct, GRAPH_SIZE, userCpuCol)
+}
+
+type DiskGraph struct {
+	graph Graph
+	disk sigar.DiskIo
+
+	diffRead int
+	diffWrite int
+}
+
+func (diskGraph *DiskGraph) collectData() {
+	oldDisk := diskGraph.disk
+
+	diskList := sigar.DiskList{}
+	diskList.Get()
+
+	newDisk := sigar.DiskIo{}
+	for _, disk := range diskList.List {
+		newDisk = disk
+		break
+	}
+
+	diskGraph.diffRead = int(convertToKilo(newDisk.ReadBytes - oldDisk.ReadBytes))
+	diskGraph.diffWrite = int(convertToKilo(newDisk.WriteBytes - oldDisk.WriteBytes))
+
+	diskGraph.disk = newDisk
+}
+
+func (diskGraph *DiskGraph) drawGraph(icon *image.RGBA) {
+	readPct := calculatePct(diskGraph.diffRead, 50 * 1024)
+	vLine(icon, diskGraph.graph.endX, 100 - readPct, GRAPH_SIZE, readCol)
+
+	writePct := calculatePct(diskGraph.diffWrite, 50 * 1024)
+	vLine(icon, diskGraph.graph.endX, 100 - writePct, GRAPH_SIZE, writeCol)
+}
+
+type NetworkGraph struct {
+	graph Graph
+	netIFace sigar.NetIface
+
+	diffDownload int
+	diffUpload int
+}
+
+func (netGraph *NetworkGraph) collectData() {
+	oldNet := netGraph.netIFace
+
+	netList := sigar.NetIfaceList{}
+	netList.Get()
+
+	newNet := sigar.NetIface{}
+	for _, net := range netList.List {
+		newNet = net
+		break
+	}
+
+	netGraph.diffDownload = int(convertToKilo(newNet.RecvBytes - oldNet.RecvBytes))
+	netGraph.diffUpload = int(convertToKilo(newNet.SendBytes - oldNet.SendBytes))
+
+	netGraph.netIFace = newNet
+}
+
+func (netGraph *NetworkGraph) drawGraph(icon *image.RGBA) {
+	readPct := calculatePct(netGraph.diffDownload, 50 * 1024)
+	vLine(icon, netGraph.graph.endX, 100 - readPct, GRAPH_SIZE, downloadCol)
+
+	writePct := calculatePct(netGraph.diffUpload, 50 * 1024)
+	vLine(icon, netGraph.graph.endX, 100 - writePct, GRAPH_SIZE, uploadCol)
 }
