@@ -15,6 +15,7 @@ const GRAPH_AMOUNT = 6
 
 var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * GRAPH_AMOUNT, GRAPH_SIZE))
 var iconData []byte
+var done = make(chan bool)
 
 func main() {
 	//initial paint the complete background
@@ -23,7 +24,8 @@ func main() {
 	}
 
 	flushDataToIcon()
-	systray.Run(onTrayReady)
+	go systray.Run(onTrayReady)
+	<-done
 }
 
 func calculatePct(value int, max int) int {
@@ -60,6 +62,7 @@ func onTrayReady() {
 	go func() {
 		<-quitClickChan
 		systray.Quit()
+		done <- true
 	}()
 
 	go worker(graphs)
