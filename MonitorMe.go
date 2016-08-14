@@ -38,28 +38,10 @@ func onTrayReady() {
 	//set a initial blank icon
 	systray.SetIcon(iconData)
 
-	quitClickChan := systray.AddMenuItem("Quit", "").ClickedCh
-	go func() {
-		<-quitClickChan
-		systray.Quit()
-	}()
-
-	go worker()
-}
-
-//draws a vertically line
-func vLine(icon *image.RGBA, posX int, topY int, bottomY int, col color.RGBA) {
-	for ; topY <= bottomY; topY++ {
-		icon.Set(posX, topY, col)
-	}
-}
-
-func worker() {
-	graphs := [GRAPH_AMOUNT]MonitorData{}
-
 	cpu := sigar.Cpu{}
 	cpu.Get()
 
+	graphs := [GRAPH_AMOUNT]MonitorData{}
 	//minus 1 because indexes starts with 0
 	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1, systray.AddMenuItem("", "")}, mem: sigar.Mem{}}
 	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1, systray.AddMenuItem("", "")}, swap: sigar.Swap{}}
@@ -74,6 +56,23 @@ func worker() {
 	graphs[4] = diskGraph
 	graphs[5] = netGraph
 
+	quitClickChan := systray.AddMenuItem("Quit", "").ClickedCh
+	go func() {
+		<-quitClickChan
+		systray.Quit()
+	}()
+
+	go worker(graphs)
+}
+
+//draws a vertically line
+func vLine(icon *image.RGBA, posX int, topY int, bottomY int, col color.RGBA) {
+	for ; topY <= bottomY; topY++ {
+		icon.Set(posX, topY, col)
+	}
+}
+
+func worker(graphs [GRAPH_AMOUNT]MonitorData) {
 	ticker := time.NewTicker(time.Second)
 	for {
 		<-ticker.C

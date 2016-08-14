@@ -6,7 +6,6 @@ import (
 	"image"
 	"github.com/getlantern/systray"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -184,9 +183,8 @@ func (netGraph *NetworkGraph) collectData() {
 	netList.Get()
 
 	newNet := sigar.NetIface{}
-	for name, net := range netList.List {
+	for _, net := range netList.List {
 		newNet = net
-		log.Println(name, newNet)
 		break
 	}
 
