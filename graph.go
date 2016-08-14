@@ -4,6 +4,10 @@ import (
 	"image/color"
 	"github.com/scalingdata/gosigar"
 	"image"
+	"github.com/getlantern/systray"
+	"fmt"
+	"log"
+	"strings"
 )
 
 const GRAPH_SIZE = 100
@@ -21,8 +25,9 @@ var readCol = color.RGBA{178, 96, 1, 255} //dark orange
 var writeCol = color.RGBA{245, 102, 17, 255} //orange
 
 type Graph struct {
-	startX        int
-	endX          int
+	startX   int
+	endX     int
+	menuItem *systray.MenuItem
 }
 
 type MonitorData interface {
@@ -32,12 +37,16 @@ type MonitorData interface {
 
 type MemoryGraph struct {
 	graph Graph
-	mem sigar.Mem
+	mem   sigar.Mem
 }
 
 func (memoryGraph *MemoryGraph) collectData() {
 	//update values
 	memoryGraph.mem.Get()
+
+	usedMem := float32(convertToKilo(memoryGraph.mem.ActualUsed)) / 1024 / 1024
+	cacheMem := float32(convertToKilo(memoryGraph.mem.Used)) / 1024 / 1024 - usedMem
+	memoryGraph.graph.menuItem.SetTitle(fmt.Sprintf("Memory: %2.2f GB, Cache %2.2f GB", usedMem, cacheMem))
 }
 
 func (memoryGraph *MemoryGraph) drawGraph(icon *image.RGBA) {
@@ -51,12 +60,15 @@ func (memoryGraph *MemoryGraph) drawGraph(icon *image.RGBA) {
 
 type SwapGraph struct {
 	graph Graph
-	swap sigar.Swap
+	swap  sigar.Swap
 }
 
 func (swapGraph *SwapGraph) collectData() {
 	//update values
 	swapGraph.swap.Get()
+
+	swapSize := float32(convertToKilo(swapGraph.swap.Used)) / 1024 / 1024
+	swapGraph.graph.menuItem.SetTitle(fmt.Sprintf("Swap: %2.2f GB", swapSize))
 }
 
 func (swapGraph *SwapGraph) drawGraph(icon *image.RGBA) {
@@ -66,12 +78,18 @@ func (swapGraph *SwapGraph) drawGraph(icon *image.RGBA) {
 
 type LoadGraph struct {
 	graph Graph
-	load sigar.LoadAverage
+	load  sigar.LoadAverage
 }
 
 func (loadGraph *LoadGraph) collectData() {
 	//update values
 	loadGraph.load.Get()
+
+	oneMinute := loadGraph.load.One
+	fiveMinute := loadGraph.load.Five
+	fifteenMinute := loadGraph.load.Fifteen
+	title := fmt.Sprintf("Load: %2.2f 1min, %2.2f 5min, %2.2f 15min", oneMinute, fiveMinute, fifteenMinute)
+	loadGraph.graph.menuItem.SetTitle(title)
 }
 
 func (loadGraph *LoadGraph) drawGraph(icon *image.RGBA) {
@@ -80,12 +98,12 @@ func (loadGraph *LoadGraph) drawGraph(icon *image.RGBA) {
 }
 
 type CpuGraph struct {
-	graph Graph
-	cpu sigar.Cpu
+	graph      Graph
+	cpu        sigar.Cpu
 
-	diffUser int
+	diffUser   int
 	diffSystem int
-	diffTotal int
+	diffTotal  int
 }
 
 func (cpuGraph *CpuGraph) collectData() {
@@ -99,6 +117,9 @@ func (cpuGraph *CpuGraph) collectData() {
 	cpuGraph.diffTotal = int(newCpu.Total() - oldCpu.Total())
 
 	cpuGraph.cpu = newCpu
+
+	title := fmt.Sprintf("CPU: %d %% User, Cache %d %% System", cpuGraph.diffUser, cpuGraph.diffSystem)
+	cpuGraph.graph.menuItem.SetTitle(title)
 }
 
 func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
@@ -110,10 +131,10 @@ func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
 }
 
 type DiskGraph struct {
-	graph Graph
-	disk sigar.DiskIo
+	graph     Graph
+	disk      sigar.DiskIo
 
-	diffRead int
+	diffRead  int
 	diffWrite int
 }
 
@@ -124,31 +145,36 @@ func (diskGraph *DiskGraph) collectData() {
 	diskList.Get()
 
 	newDisk := sigar.DiskIo{}
-	for _, disk := range diskList.List {
-		newDisk = disk
-		break
+	for name, disk := range diskList.List {
+		if strings.Contains(name, "sda") {
+			newDisk = disk
+			break
+		}
 	}
 
 	diskGraph.diffRead = int(convertToKilo(newDisk.ReadBytes - oldDisk.ReadBytes))
 	diskGraph.diffWrite = int(convertToKilo(newDisk.WriteBytes - oldDisk.WriteBytes))
 
 	diskGraph.disk = newDisk
+
+	title := fmt.Sprintf("Disk: %d kB/s Read, %d kB/s Write", diskGraph.diffRead, diskGraph.diffWrite)
+	diskGraph.graph.menuItem.SetTitle(title)
 }
 
 func (diskGraph *DiskGraph) drawGraph(icon *image.RGBA) {
-	readPct := calculatePct(diskGraph.diffRead, 50 * 1024)
+	readPct := calculatePct(diskGraph.diffRead, 100 * 1024)
 	vLine(icon, diskGraph.graph.endX, 100 - readPct, GRAPH_SIZE, readCol)
 
-	writePct := calculatePct(diskGraph.diffWrite, 50 * 1024)
+	writePct := calculatePct(diskGraph.diffWrite, 100 * 1024)
 	vLine(icon, diskGraph.graph.endX, 100 - writePct, GRAPH_SIZE, writeCol)
 }
 
 type NetworkGraph struct {
-	graph Graph
-	netIFace sigar.NetIface
+	graph        Graph
+	netIFace     sigar.NetIface
 
 	diffDownload int
-	diffUpload int
+	diffUpload   int
 }
 
 func (netGraph *NetworkGraph) collectData() {
@@ -158,8 +184,9 @@ func (netGraph *NetworkGraph) collectData() {
 	netList.Get()
 
 	newNet := sigar.NetIface{}
-	for _, net := range netList.List {
+	for name, net := range netList.List {
 		newNet = net
+		log.Println(name, newNet)
 		break
 	}
 
@@ -167,12 +194,15 @@ func (netGraph *NetworkGraph) collectData() {
 	netGraph.diffUpload = int(convertToKilo(newNet.SendBytes - oldNet.SendBytes))
 
 	netGraph.netIFace = newNet
+
+	title := fmt.Sprintf("Network: %d kB/s Down, %d kB/s Up", netGraph.diffDownload, netGraph.diffUpload)
+	netGraph.graph.menuItem.SetTitle(title)
 }
 
 func (netGraph *NetworkGraph) drawGraph(icon *image.RGBA) {
-	readPct := calculatePct(netGraph.diffDownload, 50 * 1024)
-	vLine(icon, netGraph.graph.endX, 100 - readPct, GRAPH_SIZE, downloadCol)
+	downloadPct := calculatePct(netGraph.diffDownload, 10 * 1024)
+	vLine(icon, netGraph.graph.endX, 100 - downloadPct, GRAPH_SIZE, downloadCol)
 
-	writePct := calculatePct(netGraph.diffUpload, 50 * 1024)
-	vLine(icon, netGraph.graph.endX, 100 - writePct, GRAPH_SIZE, uploadCol)
+	uploadPct := calculatePct(netGraph.diffUpload, 10 * 1024)
+	vLine(icon, netGraph.graph.endX, 100 - uploadPct, GRAPH_SIZE, uploadCol)
 }

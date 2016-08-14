@@ -11,12 +11,14 @@ import (
 	"github.com/scalingdata/gosigar"
 )
 
-var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * 6, GRAPH_SIZE))
+const GRAPH_AMOUNT = 6
+
+var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * GRAPH_AMOUNT, GRAPH_SIZE))
 var iconData []byte
 
 func main() {
 	//initial paint the complete background
-	for posX := 0; posX <= GRAPH_SIZE * 6; posX++ {
+	for posX := 0; posX <= GRAPH_SIZE * GRAPH_AMOUNT; posX++ {
 		vLine(icon, posX, 0, GRAPH_SIZE, background)
 	}
 
@@ -53,18 +55,18 @@ func vLine(icon *image.RGBA, posX int, topY int, bottomY int, col color.RGBA) {
 }
 
 func worker() {
-	graphs := [6]MonitorData{}
+	graphs := [GRAPH_AMOUNT]MonitorData{}
 
 	cpu := sigar.Cpu{}
 	cpu.Get()
 
 	//minus 1 because indexes starts with 0
-	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1}, mem: sigar.Mem{}}
-	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1}, swap: sigar.Swap{}}
-	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1}, load: sigar.LoadAverage{}}
-	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1}, cpu: cpu}
-	diskGraph := &DiskGraph{graph: Graph{GRAPH_SIZE * 4, GRAPH_SIZE * 5 - 1}, disk: sigar.DiskIo{}}
-	netGraph := &NetworkGraph{graph: Graph{GRAPH_SIZE * 5, GRAPH_SIZE * 6 - 1}, netIFace: sigar.NetIface{}}
+	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1, systray.AddMenuItem("", "")}, mem: sigar.Mem{}}
+	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1, systray.AddMenuItem("", "")}, swap: sigar.Swap{}}
+	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1, systray.AddMenuItem("", "")}, load: sigar.LoadAverage{}}
+	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1, systray.AddMenuItem("", "")}, cpu: cpu}
+	diskGraph := &DiskGraph{graph: Graph{GRAPH_SIZE * 4, GRAPH_SIZE * 5 - 1, systray.AddMenuItem("", "")}, disk: sigar.DiskIo{}}
+	netGraph := &NetworkGraph{graph: Graph{GRAPH_SIZE * 5, GRAPH_SIZE * 6 - 1, systray.AddMenuItem("", "")}, netIFace: sigar.NetIface{}}
 	graphs[0] = memGraph
 	graphs[1] = swapGraph
 	graphs[2] = loadGraph
@@ -89,7 +91,7 @@ func worker() {
 //move the old data one row back
 func scrollForward() {
 	//start with the second row and just override the first row
-	for posX := 1; posX < GRAPH_SIZE * 6; posX++ {
+	for posX := 1; posX < GRAPH_SIZE * GRAPH_AMOUNT; posX++ {
 		for posY := 0; posY <= GRAPH_SIZE; posY++ {
 			col := icon.At(posX, posY)
 			icon.Set(posX - 1, posY, col)
@@ -97,7 +99,7 @@ func scrollForward() {
 	}
 
 	//set the background of the new created row at the end
-	vLine(icon, GRAPH_SIZE * 6, 0, GRAPH_SIZE, background)
+	vLine(icon, GRAPH_SIZE * GRAPH_AMOUNT, 0, GRAPH_SIZE, background)
 }
 
 func flushDataToIcon() {

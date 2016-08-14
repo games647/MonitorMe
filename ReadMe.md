@@ -13,10 +13,6 @@ Cross-platform application to display performance charts in the taskbar as a tra
 * Network usage (only available in cloudfoundry/gosigar)
 * Disk usage (only available in cloudfoundry/gosigar)
 
-### Planned 
-
-* Menu items about more detailed data
-
 ## Downloads
 
 https://github.com/games647/MonitorMe/releases
