@@ -40,17 +40,20 @@ func onTrayReady() {
 	//set a initial blank icon
 	systray.SetIcon(iconData)
 
+	loadAvg := sigar.LoadAverage{}
+	netFace := sigar.NetIface{}
 	cpu := sigar.Cpu{}
 	cpu.Get()
 
 	graphs := [GRAPH_AMOUNT]MonitorData{}
 	//minus 1 because indexes starts with 0
-	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1, systray.AddMenuItem("", "")}, mem: sigar.Mem{}}
-	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1, systray.AddMenuItem("", "")}, swap: sigar.Swap{}}
-	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1, systray.AddMenuItem("", "")}, load: sigar.LoadAverage{}}
-	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1, systray.AddMenuItem("", "")}, cpu: cpu}
-	diskGraph := &DiskGraph{graph: Graph{GRAPH_SIZE * 4, GRAPH_SIZE * 5 - 1, systray.AddMenuItem("", "")}, disk: sigar.DiskIo{}}
-	netGraph := &NetworkGraph{graph: Graph{GRAPH_SIZE * 5, GRAPH_SIZE * 6 - 1, systray.AddMenuItem("", "")}, netIFace: sigar.NetIface{}}
+	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1, blankItem()}, mem: sigar.Mem{}}
+	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1, blankItem()}, swap: sigar.Swap{}}
+
+	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1, blankItem()}, load: loadAvg}
+	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1, blankItem()}, cpu: cpu}
+	diskGraph := &DiskGraph{graph: Graph{GRAPH_SIZE * 4, GRAPH_SIZE * 5 - 1, blankItem()}, disk: sigar.DiskIo{}}
+	netGraph := &NetworkGraph{graph: Graph{GRAPH_SIZE * 5, GRAPH_SIZE * 6 - 1, blankItem()}, netIFace: netFace}
 	graphs[0] = memGraph
 	graphs[1] = swapGraph
 	graphs[2] = loadGraph
@@ -114,4 +117,8 @@ func flushDataToIcon() {
 
 	iconData = buf.Bytes()
 	systray.SetIcon(iconData)
+}
+
+func blankItem() *systray.MenuItem {
+	return systray.AddMenuItem("", "")
 }
