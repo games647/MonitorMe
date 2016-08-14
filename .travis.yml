@@ -9,3 +9,10 @@ install:
 # Resolve dependencies
   - go get -u "github.com/getlantern/systray"
   - go get -u "github.com/cloudfoundry/gosigar"
+
+script:
+  - go test -v ./...
+  # Test cross-compiles for all main operation systems
+  - GOOS=linux GOARCH=amd64 go build -o monitorme-linux *.go
+#  - GOOS=windows GOARCH=amd64 go build -o monitorme-windows.exe *.go
+#  - GOOS=darwin GOARCH=386 go build -o monitorme-mac *.go

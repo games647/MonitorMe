@@ -38,12 +38,19 @@ MonitorMe.exe
 ## Supported OS
 
 * Linux
-* Mac (untested)
+* Mac
 * Windows (supports only one icon and load average isn't available)
+Requires to compile a dll file: https://github.com/getlantern/systray#windows
+
+Cross compiles doesn't seem to work, but it looks like if you compile it on the target machine:
+example:
+for linux compile it on a linux
+for windows compile it on a windows
+for mac compile it on a mac
 
 ## Credits/Dependencies
 
 * Golang 1.6+
 * https://github.com/getlantern/systray
 * https://github.com/cloudfoundry/gosigar
-* https://github.com/scalingdata/gosigar (assuming Linux only - cross compile to windows failed)
+* https://github.com/scalingdata/gosigar
