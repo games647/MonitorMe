@@ -11,12 +11,12 @@ import (
 	"github.com/cloudfoundry/gosigar"
 )
 
-var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * 3, GRAPH_SIZE))
+var icon = image.NewRGBA(image.Rect(0, 0, GRAPH_SIZE * 4, GRAPH_SIZE))
 var iconData []byte
 
 func main() {
 	//initial paint the complete background
-	for posX := 0; posX <= GRAPH_SIZE * 3; posX++ {
+	for posX := 0; posX <= GRAPH_SIZE * 4; posX++ {
 		vLine(icon, posX, 0, GRAPH_SIZE, background)
 	}
 
@@ -53,15 +53,20 @@ func vLine(icon *image.RGBA, posX int, topY int, bottomY int, col color.RGBA) {
 }
 
 func worker() {
-	graphs := [3]MonitorData{}
+	graphs := [4]MonitorData{}
+
+	cpu := sigar.Cpu{}
+	cpu.Get()
 
 	//minus 1 because indexes starts with 0
 	memGraph := &MemoryGraph{graph: Graph{0, GRAPH_SIZE - 1}, mem: sigar.Mem{}}
 	swapGraph := &SwapGraph{graph: Graph{GRAPH_SIZE, GRAPH_SIZE * 2 - 1}, swap: sigar.Swap{}}
 	loadGraph := &LoadGraph{graph: Graph{GRAPH_SIZE * 2, GRAPH_SIZE * 3 - 1}, load: sigar.LoadAverage{}}
+	cpuGraph := &CpuGraph{graph: Graph{GRAPH_SIZE * 3, GRAPH_SIZE * 4 - 1}, cpu: cpu}
 	graphs[0] = memGraph
 	graphs[1] = swapGraph
 	graphs[2] = loadGraph
+	graphs[3] = cpuGraph
 
 	ticker := time.NewTicker(time.Second)
 	for {
@@ -80,7 +85,7 @@ func worker() {
 //move the old data one row back
 func scrollForward() {
 	//start with the second row and just override the first row
-	for posX := 1; posX < GRAPH_SIZE * 3; posX++ {
+	for posX := 1; posX < GRAPH_SIZE * 4; posX++ {
 		for posY := 0; posY <= GRAPH_SIZE; posY++ {
 			col := icon.At(posX, posY)
 			icon.Set(posX - 1, posY, col)

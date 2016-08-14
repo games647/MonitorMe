@@ -9,10 +9,10 @@ Cross-platform application to display performance charts in the taskbar as a tra
 * Memory usage (including cache)
 * Swap
 * Load average (*nix only)
+* CPU usage (system and user)
 
 ### Planned 
 
-* CPU usage (system and user) - have to compare it with a every second - not implemented yet
 * Network usage (only available in cloudfoundry/gosigar)
 * Disk usage (only available in cloudfoundry/gosigar)
 

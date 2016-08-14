@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"github.com/cloudfoundry/gosigar"
 	"image"
+	"log"
 )
 
 const GRAPH_SIZE = 100
@@ -32,7 +33,6 @@ type MonitorData interface {
 
 type MemoryGraph struct {
 	graph Graph
-
 	mem sigar.Mem
 }
 
@@ -52,7 +52,6 @@ func (memoryGraph *MemoryGraph) drawGraph(icon *image.RGBA) {
 
 type SwapGraph struct {
 	graph Graph
-
 	swap sigar.Swap
 }
 
@@ -68,7 +67,6 @@ func (swapGraph *SwapGraph) drawGraph(icon *image.RGBA) {
 
 type LoadGraph struct {
 	graph Graph
-
 	load sigar.LoadAverage
 }
 
@@ -79,5 +77,36 @@ func (loadGraph *LoadGraph) collectData() {
 
 func (loadGraph *LoadGraph) drawGraph(icon *image.RGBA) {
 	height := int(loadGraph.load.One * 100)
-	vLine(icon, loadGraph.graph.endX - 1, 100 - height, GRAPH_SIZE, loadColor)
+	vLine(icon, loadGraph.graph.endX, 100 - height, GRAPH_SIZE, loadColor)
+}
+
+type CpuGraph struct {
+	graph Graph
+	cpu sigar.Cpu
+
+	diffUser int
+	diffSystem int
+	diffTotal int
+}
+
+func (cpuGraph *CpuGraph) collectData() {
+	oldCpu := cpuGraph.cpu
+
+	newCpu := sigar.Cpu{}
+	newCpu.Get()
+
+	cpuGraph.diffUser = int(newCpu.User - oldCpu.User)
+	cpuGraph.diffSystem = int(newCpu.Sys - oldCpu.Sys)
+	cpuGraph.diffTotal = int(newCpu.Total() - oldCpu.Total())
+
+	cpuGraph.cpu = newCpu
+}
+
+func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
+	systemPct := cpuGraph.diffSystem
+	log.Println(cpuGraph.graph.endX)
+	vLine(icon, cpuGraph.graph.endX, 100 - systemPct, GRAPH_SIZE, systemCpuCol)
+
+	userPct := cpuGraph.diffUser
+	vLine(icon, cpuGraph.graph.endX, 100 - userPct, GRAPH_SIZE, userCpuCol)
 }
