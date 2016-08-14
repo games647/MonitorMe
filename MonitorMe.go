@@ -98,7 +98,7 @@ func scrollForward() {
 	}
 
 	//set the background of the new created row at the end
-	vLine(icon, GRAPH_SIZE * GRAPH_AMOUNT, 0, GRAPH_SIZE, background)
+	vLine(icon, GRAPH_SIZE * GRAPH_AMOUNT - 1, 0, GRAPH_SIZE, background)
 }
 
 func flushDataToIcon() {

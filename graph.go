@@ -51,10 +51,10 @@ func (memoryGraph *MemoryGraph) collectData() {
 func (memoryGraph *MemoryGraph) drawGraph(icon *image.RGBA) {
 	//including cache
 	totalMemPct := calculatePct(convertToKilo(memoryGraph.mem.Used), convertToKilo(memoryGraph.mem.Total))
-	vLine(icon, memoryGraph.graph.endX, 100 - totalMemPct, GRAPH_SIZE, totalMemCol)
+	vLine(icon, memoryGraph.graph.endX, GRAPH_SIZE - totalMemPct, GRAPH_SIZE, totalMemCol)
 
 	usedPct := calculatePct(convertToKilo(memoryGraph.mem.ActualUsed), convertToKilo(memoryGraph.mem.Total))
-	vLine(icon, memoryGraph.graph.endX, 100 - usedPct, GRAPH_SIZE, memCol)
+	vLine(icon, memoryGraph.graph.endX, GRAPH_SIZE - usedPct, GRAPH_SIZE, memCol)
 }
 
 type SwapGraph struct {
@@ -72,7 +72,7 @@ func (swapGraph *SwapGraph) collectData() {
 
 func (swapGraph *SwapGraph) drawGraph(icon *image.RGBA) {
 	freeSwapPct := calculatePct(convertToKilo(swapGraph.swap.Used), convertToKilo(swapGraph.swap.Total))
-	vLine(icon, swapGraph.graph.endX, 100 - freeSwapPct, GRAPH_SIZE, swapCol)
+	vLine(icon, swapGraph.graph.endX, GRAPH_SIZE - freeSwapPct, GRAPH_SIZE, swapCol)
 }
 
 type LoadGraph struct {
@@ -93,7 +93,7 @@ func (loadGraph *LoadGraph) collectData() {
 
 func (loadGraph *LoadGraph) drawGraph(icon *image.RGBA) {
 	height := int(loadGraph.load.One * 100)
-	vLine(icon, loadGraph.graph.endX, 100 - height, GRAPH_SIZE, loadColor)
+	vLine(icon, loadGraph.graph.endX, GRAPH_SIZE - height, GRAPH_SIZE, loadColor)
 }
 
 type CpuGraph struct {
@@ -123,10 +123,10 @@ func (cpuGraph *CpuGraph) collectData() {
 
 func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
 	systemPct := cpuGraph.diffSystem
-	vLine(icon, cpuGraph.graph.endX, 100 - systemPct, GRAPH_SIZE, systemCpuCol)
+	vLine(icon, cpuGraph.graph.endX, GRAPH_SIZE - systemPct, GRAPH_SIZE, systemCpuCol)
 
 	userPct := cpuGraph.diffUser
-	vLine(icon, cpuGraph.graph.endX, 100 - userPct, GRAPH_SIZE, userCpuCol)
+	vLine(icon, cpuGraph.graph.endX, GRAPH_SIZE - userPct, GRAPH_SIZE, userCpuCol)
 }
 
 type DiskGraph struct {
@@ -162,10 +162,10 @@ func (diskGraph *DiskGraph) collectData() {
 
 func (diskGraph *DiskGraph) drawGraph(icon *image.RGBA) {
 	readPct := calculatePct(diskGraph.diffRead, 100 * 1024)
-	vLine(icon, diskGraph.graph.endX, 100 - readPct, GRAPH_SIZE, readCol)
+	vLine(icon, diskGraph.graph.endX, GRAPH_SIZE - readPct, GRAPH_SIZE, readCol)
 
 	writePct := calculatePct(diskGraph.diffWrite, 100 * 1024)
-	vLine(icon, diskGraph.graph.endX, 100 - writePct, GRAPH_SIZE, writeCol)
+	vLine(icon, diskGraph.graph.endX, GRAPH_SIZE - writePct, GRAPH_SIZE, writeCol)
 }
 
 type NetworkGraph struct {
@@ -199,8 +199,8 @@ func (netGraph *NetworkGraph) collectData() {
 
 func (netGraph *NetworkGraph) drawGraph(icon *image.RGBA) {
 	downloadPct := calculatePct(netGraph.diffDownload, 10 * 1024)
-	vLine(icon, netGraph.graph.endX, 100 - downloadPct, GRAPH_SIZE, downloadCol)
+	vLine(icon, netGraph.graph.endX, GRAPH_SIZE - downloadPct, GRAPH_SIZE, downloadCol)
 
 	uploadPct := calculatePct(netGraph.diffUpload, 10 * 1024)
-	vLine(icon, netGraph.graph.endX, 100 - uploadPct, GRAPH_SIZE, uploadCol)
+	vLine(icon, netGraph.graph.endX, GRAPH_SIZE - uploadPct, GRAPH_SIZE, uploadCol)
 }
