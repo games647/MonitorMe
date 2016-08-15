@@ -49,6 +49,9 @@ func (memoryGraph *MemoryGraph) collectData() {
 }
 
 func (memoryGraph *MemoryGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, memoryGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	//including cache
 	totalMemPct := calculatePct(convertToKilo(memoryGraph.mem.Used), convertToKilo(memoryGraph.mem.Total))
 	vLine(icon, memoryGraph.graph.endX, GRAPH_SIZE - totalMemPct, GRAPH_SIZE, totalMemCol)
@@ -71,6 +74,9 @@ func (swapGraph *SwapGraph) collectData() {
 }
 
 func (swapGraph *SwapGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, swapGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	freeSwapPct := calculatePct(convertToKilo(swapGraph.swap.Used), convertToKilo(swapGraph.swap.Total))
 	vLine(icon, swapGraph.graph.endX, GRAPH_SIZE - freeSwapPct, GRAPH_SIZE, swapCol)
 }
@@ -92,6 +98,9 @@ func (loadGraph *LoadGraph) collectData() {
 }
 
 func (loadGraph *LoadGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, loadGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	height := int(loadGraph.load.One * 100)
 	vLine(icon, loadGraph.graph.endX, GRAPH_SIZE - height, GRAPH_SIZE, loadColor)
 }
@@ -122,6 +131,9 @@ func (cpuGraph *CpuGraph) collectData() {
 }
 
 func (cpuGraph *CpuGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, cpuGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	systemPct := cpuGraph.diffSystem
 	vLine(icon, cpuGraph.graph.endX, GRAPH_SIZE - systemPct, GRAPH_SIZE, systemCpuCol)
 
@@ -161,6 +173,9 @@ func (diskGraph *DiskGraph) collectData() {
 }
 
 func (diskGraph *DiskGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, diskGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	readPct := calculatePct(diskGraph.diffRead, 100 * 1024)
 	vLine(icon, diskGraph.graph.endX, GRAPH_SIZE - readPct, GRAPH_SIZE, readCol)
 
@@ -198,6 +213,9 @@ func (netGraph *NetworkGraph) collectData() {
 }
 
 func (netGraph *NetworkGraph) drawGraph(icon *image.RGBA) {
+	//set the background of the new created row at the end
+	vLine(icon, netGraph.graph.endX, 0, GRAPH_SIZE, background)
+
 	downloadPct := calculatePct(netGraph.diffDownload, 10 * 1024)
 	vLine(icon, netGraph.graph.endX, GRAPH_SIZE - downloadPct, GRAPH_SIZE, downloadCol)
 
