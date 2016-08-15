@@ -33,7 +33,7 @@ MonitorMe.exe
 
 ## Image
 
-![ubuntu showcase](http://i.imgur.com/9s8vXIz.png)
+![ubuntu showcase](http://i.imgur.com/gdDiHry.png)
 
 ## Supported OS
 
@@ -54,3 +54,9 @@ for mac compile it on a mac
 * https://github.com/getlantern/systray
 * https://github.com/cloudfoundry/gosigar
 * https://github.com/scalingdata/gosigar
+
+Inspired by:
+
+https://apps.ubuntu.com/cat/applications/precise/indicator-multiload/
+
+An application for ubuntu. This ports it to golang in order to make it platform independent.

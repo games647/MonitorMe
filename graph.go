@@ -117,7 +117,7 @@ func (cpuGraph *CpuGraph) collectData() {
 
 	cpuGraph.cpu = newCpu
 
-	title := fmt.Sprintf("CPU: %d %% User, Cache %d %% System", cpuGraph.diffUser, cpuGraph.diffSystem)
+	title := fmt.Sprintf("CPU: %d %% User, %d %% System", cpuGraph.diffUser, cpuGraph.diffSystem)
 	cpuGraph.graph.menuItem.SetTitle(title)
 }
 
