@@ -1,13 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"image"
 	"image/color"
-	"bytes"
 	"image/jpeg"
 	"log"
-	"github.com/getlantern/systray"
 	"time"
+
+	"github.com/getlantern/systray"
 	"github.com/scalingdata/gosigar"
 )
 
@@ -24,7 +25,7 @@ func main() {
 	}
 
 	flushDataToIcon()
-	go systray.Run(onTrayReady)
+	go systray.Run(onTrayReady, nil)
 	<-done
 }
 
